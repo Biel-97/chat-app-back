@@ -56,9 +56,12 @@ router.post('/addContact', authenticateToken, async (req, res) => {
       let user = await User.findOne({ email })
       contact.name = user.name
     }
-    if (await User.findOne({ _id: User_ID, contacts: { email } })) {
-      return res.send({ error: 'User allready added.' })
-    }
+    const user = await User.findOne({ _id: User_ID })
+    user.contacts.forEach((contact) => {
+      if(contact.email == email){
+        return res.send({ error: 'User allready added.' })
+      }
+    })
 
     User.findOneAndUpdate(
       { _id: req.body.id },
@@ -96,41 +99,37 @@ router.post('/getContact', authenticateToken, async (req, res) => {
 
 
 router.post('/newGroup', authenticateToken, async (req, res) => {
-
   try {
-    const CurrentRoom = await privateRoom.create(req.body.room)
+    if (await privateRoom.findOne({ roomName: req.body.room.roomName })) {
+      return res.send({ error: 'Name already in use, choose another.' })
+    }if(req.body.room.roomName == 'public'){
+    return res.send({ error: 'public name are unavailable, choose another.' })
 
+  }
+    const CurrentRoom = await privateRoom.create(req.body.room)
     let participants = req.body.room.participants
-    const Room = {
+
+    const room = {
       name: CurrentRoom.roomName,
       Room_id: CurrentRoom._id
     }
-
-
-    participants.forEach(async element => {
-
-      await User.findOneAndUpdate({ email: element.email },
-          {$push: {
-            Rooms: Room
-          }
-        }, (err, data) => {
+    
+    participants.forEach(element => {
+      User.findOneAndUpdate(
+        { email: element.email },
+        { $push: { Rooms: room } }, (err, data) => {
           if (err) {
-            console.log(err)
-            res.send({ error: 'new group error' })
-            
+            res.send({ error: 'error to create the group.' })
           } else {
-            console.log('query salvo')
+            console.log('tudo ok')
           }
         }
         )
-      
-
-    })
-    res.send({ ok: 'ok' })
+      });
+      res.send({ ok: 'ok' })
 
 
   } catch (error) {
-    console.log(error)
     res.send({ error: error })
   }
 
@@ -148,10 +147,8 @@ router.get('/getgroups', async (req, res) => {
       });
 
   } catch (error) {
-    console.log('erro')
+    console.log('/getgroups ---erro')
   }
-
-
 });
 
 
@@ -161,18 +158,31 @@ router.post('/groupMessages', authenticateToken, async (req, res) => {
     const chat_ID = req.body.chatId
     if (chat_ID) {
       const currentChat = await privateRoom.findOne({ _id: chat_ID })
-      console.log(currentChat.messages)
       res.send({ messages: currentChat.messages })
     } else {
       res.send({ error: 'Chat without a id.' })
     }
-
   } catch (error) {
-    console.log(error)
     res.send({ error: error })
   }
 
-
 });
 
+
+router.post('/authRoom', authenticateToken, async (req, resp) => {
+  try {
+    const User_ID = req.body.id
+    const Room_ID = req.body.roomId
+    const currentUser = await User.findOne({ _id: User_ID})
+
+    if (currentUser) {
+      return resp.send(currentUser.Rooms.Room_id == Room_ID)
+    } else {
+      return res.status(400).send({ error: 'error' })
+    }
+    
+  } catch (error) {
+    return resp.send({ error: 'error' })
+  }
+})
 module.exports = app => app.use('/', router)

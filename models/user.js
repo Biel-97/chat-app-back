@@ -30,10 +30,6 @@ const userSchema = new mongoose.Schema({
             Room_id: {
                 type: String,
                 require: true
-            },
-            status: {
-                type: Boolean,
-                required: true
             }
         }],
     contacts: [{

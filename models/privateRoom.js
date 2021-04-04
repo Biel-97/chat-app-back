@@ -17,8 +17,12 @@ const RoomSchema = new mongoose.Schema({
             lowercase: true,
         }
     },
-
-
+    socketID:{
+        type: String
+    },
+    description:{
+        type: String
+    },
     CreatedAt: {
         type: Date,
         default: Date.now
@@ -31,6 +35,10 @@ const RoomSchema = new mongoose.Schema({
             name:{
                 type: String,
                 required: true
+            },
+            id:{
+              type: String,
+              required: true
             },
             message: {
                 type: String,
