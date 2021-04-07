@@ -8,7 +8,8 @@ require('dotenv').config()
 
 router.post('/register', async (req, res)=> {
     const { email, name, password } = req.body
-
+    req.body.userSocketID =''
+    req.body.currentRoomName =''
     try {
         // if (!email && !name && !password) return res.send({ error: 'Please, fill the fields below.' })
         // if (!name) return res.send({ error: 'Name field is empty' })
@@ -28,6 +29,7 @@ router.post('/register', async (req, res)=> {
             return res.send({ userInfo, token })
         }
     } catch (err) {
+        console.log(err)
         return res.send({ error: 'Registration fail', err })
     }
 

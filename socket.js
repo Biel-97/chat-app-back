@@ -17,54 +17,52 @@ const eventConnectionHandler = (socket_Server, io) => {
         id: data.User_ID,
         roomName: data.roomName
       }
-      privateRoom.findOneAndUpdate(
-          { _id: data.room_ID },
-          { $push: { messages: newMessage } }, (err, data) => {
-              if (err) {
-                  res.send({ error: err })
-              } else {
-              }
-          }
-      )
-
-
-      io.to(data.roomName).emit('new message', newMessage)
+      rooms.updateMessageRoom(data.room_ID, newMessage)
+      
+      io.to(data.room_ID).emit('new message', newMessage)
 
     }
   })
 
   socket_Server.on('joinRoom', (data) => {
-    // console.log(socket_Server.id)
+    console.log('---')
+    console.log(data)
+    console.log('---')
+    rooms.updatUserSocketID(data.User_ID, socket_Server.id, data.room_ID)
 
-    // rooms.updatUserSocketID(data.User_ID, socket_Server.id, data.roomName)
+    if (data.roomName == 'public') {
+      io.to('public').emit('new message', {
+        email: 'Chat-Bot',
+        UserName: 'Chat-Bot',
+        message: `User ${data.UserName} has been joined the public room`,
+        id: 'Chat-Bot-Id',
+        roomName: 'public'
+      })
+      
+      socket_Server.emit('new message', {
+        email: 'Chat-Bot',
+        UserName: 'Chat-Bot',
+        message: `Welcome to public room`,
+        id: 'Chat-Bot-Id',
+        roomName: 'public'
+      })
+    }
 
 
-    socket_Server.join(data.roomName)
+    socket_Server.join(data.room_ID)
 
-    socket_Server.on('exitRoom', (exitData)=> {
-      socket_Server.leave(exitData.roomName)
+
+    socket_Server.on('exitRoom', async (exitData) => {
+      console.log('saida')
+      socket_Server.leave(exitData.room_ID)
 
     })
 
-
-
-    // rooms.removeUser(socket_Server.id)
-    // rooms.addRoom(socket_Server.id, data.name, data.roomName)
-
-    // socket_Server.emit('new message', `Welcome to ${data.room}`)
-    // socket_Server.broadcast.to(data.room).emit(
-    //     'new message',
-    //      `${data.name} has been connected to ${data.room} room`)
-
-    console.log('_________')
   })
 
 
-  socket_Server.on('disconnect', () => {
-    // console.log(socket_Server.id)
-    // socket_Server.leave(socket_Server.id)
-    console.log(socket_Server.rooms)
-
+  socket_Server.on('disconnect',  async () => {
+    socket_Server.leave(await rooms.getUserRoomName(socket_Server.id))
 
   })
 

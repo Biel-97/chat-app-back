@@ -21,6 +21,9 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    currentRoomName: {
+        type: String,
+    },
     Rooms:
         [{
             name: {
@@ -40,22 +43,15 @@ const userSchema = new mongoose.Schema({
         email: {
             type: String,
             require: true
-        },
-        messages: [
-            {
-                message: {
-                    type: String,
-                },
-                SendedAt: {
-                    type: Date,
-                    default: Date.now
-                },
-                SendedBy: {
-                    type: String
-                }
-            }
-        ]
-    }]
+        }
+    }],
+    privateChatIds: [{}],
+    userSocketID: {
+        type: String,
+        require: true,
+        unique: true
+    },
+
 })
 
 userSchema.pre('save', async function (next) {

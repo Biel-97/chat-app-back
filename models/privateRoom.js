@@ -17,7 +17,7 @@ const RoomSchema = new mongoose.Schema({
             lowercase: true,
         }
     },
-    socketID:{
+    SocketID:{
         type: String
     },
     description:{

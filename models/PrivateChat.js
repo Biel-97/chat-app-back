@@ -1,19 +1,7 @@
 const mongoose = require('../database/index')
-const bcrypt = require('bcryptjs')
-
 const PrivateSchema = new mongoose.Schema({
 
-    persons: [{
-            name: {
-                type: String,
-                required: true
-
-            },
-            email: {
-                type: String,
-                required: true
-            },
-        }],
+    personsID: [String],
     messages: [{
         name: {
             type: String,
@@ -34,5 +22,6 @@ const PrivateSchema = new mongoose.Schema({
 
 
 
-const privateMessage = mongoose.model('PrivateRoom', PrivateSchema)
-module.exports = privateMessage
+const PrivateChat = mongoose.model('PrivateChat', PrivateSchema)
+module.exports = PrivateChat
+

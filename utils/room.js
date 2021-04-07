@@ -1,77 +1,69 @@
-const { privateRoom } = require('../models/privateRoom')
-
 const PrivateRoom = require('../models/privateRoom')
+const privateChat = require('../models/PrivateChat')
+const User = require('../models/user')
 
 class Rooms {
-  constructor() {
-    this.rooms = [{
-      socketID: '',
-
-      roomName: ''
-    }];
-  }
+  constructor() { }
 
 
-  getRoomList(roomName) {
-    let rooms = this.rooms.filter((room) => room.room === roomName);
-    let namesArray = rooms.map((room) => room.name);
-
-    return namesArray;
-  }
-
-  getRoom(socketID) {
-    return this.rooms.filter((room) => room.socketID === socketID)[0];
-  }
-
-  removeUser(socketID) {
-    let user = this.getRoom(socketID);
-    if (user) {
-      this.rooms = this.rooms.filter((user) => user.socketID !== socketID);
-    }
-
-    return user;
-  }
-
-  updatUserSocketID(userID, socketID, currentRoomName) {
-    console.log(socketID)
+  async updatUserSocketID(userID, socketID, currentRoomName) {
     User.findOneAndUpdate(
       { _id: userID },
-      { socketID },
-      { currentRoomName },
+      { userSocketID: socketID },
       (err, user) => {
         if (err) {
           console.log('update error')
           res.send({ error: err })
         } else {
-          // console.log('tudo ok')
+          console.log('socket id do usuario atualizado')
         }
       }
     )
-  }
-  async getUserRoomName(socketID) {
-    const room = await PrivateRoom.findOne({ socketID })
-    console.log(room)
-    return room
-  }
-  async addRoom(roomID, socketID) {
-    await PrivateRoom.findOneAndUpdate(
-      { _id: roomID },
-      { socketID: socketID })
-    return 'ok'
-  }
-  async updateMessageRoom(roomID, socketID, newMessage) {
 
-    await PrivateRoom.findOneAndUpdate(
-      { _id: roomID },
-      { socketID: socketID },
-      { $push: { messages: newMessage } }  , (err, data) => {
+    
+    User.findOneAndUpdate(
+      { _id: userID },
+      { currentRoomName: currentRoomName },
+      (err, user) => {
         if (err) {
+          console.log('update error')
           res.send({ error: err })
         } else {
-          console.log('mensagem salvada')
+          console.log('CurrentRoom do usuario atualizado')
         }
       }
     )
+  }
+
+
+
+
+
+  async getUserRoomName(socketID) {
+    const room = await User.findOne({ userSocketID: socketID })
+    const currentRoom = await room.currentRoomName
+    return currentRoom
+  }
+
+  async updateMessageRoom(roomID, newMessage) {
+    console.log(newMessage)
+    if (await PrivateRoom.findOne({ _id: roomID }) != null) {
+
+      console.log('mensagem do grupo')
+      await PrivateRoom.findOneAndUpdate(
+        { _id: roomID },
+        { $push: { messages: newMessage } } )
+    }
+    
+    if (await privateChat.findOne({ _id: roomID }) != null) {
+      
+      console.log('mensagem do chat privado')
+      await privateChat.findOneAndUpdate(
+        { _id: roomID },
+        { $push: { messages: newMessage } }
+      )
+    }
+
   }
 
 
