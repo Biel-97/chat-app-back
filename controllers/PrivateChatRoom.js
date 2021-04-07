@@ -31,9 +31,7 @@ router.post('/newPrivateChat', authenticateToken, async (req, res) => {
           name: req.body.name
         }
         const contactInfo = req.body.contactId
-        console.log(contactInfo)
         const chat = await PrivateChat.findOne({personsID: [UserID ,contactId]}) || await PrivateChat.findOne({personsID: [contactId, UserID]})
-        console.log(userInfo)
         if(chat != null){
             console.log('Chat already exist.')
             return res.send({chatId: chat._id})

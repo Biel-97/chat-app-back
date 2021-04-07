@@ -99,9 +99,7 @@ router.post('/getContact', authenticateToken, async (req, res) => {
 
 router.post('/newGroup', authenticateToken, async (req, res) => {
   try {
-    if (await privateRoom.findOne({ roomName: req.body.room.roomName })) {
-      return res.send({ error: 'Name already in use, choose another.' })
-    }if(req.body.room.roomName == 'public'){
+    if(req.body.room.roomName == 'public'){
     return res.send({ error: 'public name are unavailable, choose another.' })
 
   }
@@ -157,8 +155,7 @@ router.post('/groupMessages', authenticateToken, async (req, res) => {
     const chat_ID = req.body.chatId
     if (chat_ID) {
       const currentChat = await privateRoom.findOne({ _id: chat_ID }) || await privateChatRoom.findOne({_id: chat_ID})
-      // console.log(currentChat)
-      res.send({ messages: currentChat.messages })
+      res.send({ messages: currentChat.messages, description: currentChat.description })
     } else {
       res.send({ error: 'Chat without a id.' })
     }

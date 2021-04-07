@@ -5,67 +5,47 @@ const User = require('../models/user')
 class Rooms {
   constructor() { }
 
-
   async updatUserSocketID(userID, socketID, currentRoomName) {
     User.findOneAndUpdate(
       { _id: userID },
-      { userSocketID: socketID },
-      (err, user) => {
-        if (err) {
-          console.log('update error')
-          res.send({ error: err })
-        } else {
-          console.log('socket id do usuario atualizado')
-        }
-      }
-    )
+      { userSocketID: socketID } )
 
-    
+
     User.findOneAndUpdate(
       { _id: userID },
-      { currentRoomName: currentRoomName },
-      (err, user) => {
-        if (err) {
-          console.log('update error')
-          res.send({ error: err })
-        } else {
-          console.log('CurrentRoom do usuario atualizado')
-        }
-      }
-    )
+      { currentRoomName: currentRoomName } )
   }
-
-
-
 
 
   async getUserRoomName(socketID) {
-    const room = await User.findOne({ userSocketID: socketID })
-    const currentRoom = await room.currentRoomName
-    return currentRoom
+      const room = (await User.findOne({ userSocketID: socketID }) == null) == true? 'public': await User.findOne({ userSocketID: socketID })
+      if(room == 'public'){
+        return 'public'
+      }else{
+        return  await room.currentRoomName
+      }
   }
 
-  async updateMessageRoom(roomID, newMessage) {
-    console.log(newMessage)
-    if (await PrivateRoom.findOne({ _id: roomID }) != null) {
 
+  async updateMessageRoom(roomID, newMessage, io) {
+    if (await PrivateRoom.findOne({ _id: roomID }) != null) {
+      
       console.log('mensagem do grupo')
       await PrivateRoom.findOneAndUpdate(
         { _id: roomID },
-        { $push: { messages: newMessage } } )
-    }
-    
-    if (await privateChat.findOne({ _id: roomID }) != null) {
+        { $push: { messages: newMessage } })
+      }
       
-      console.log('mensagem do chat privado')
-      await privateChat.findOneAndUpdate(
-        { _id: roomID },
-        { $push: { messages: newMessage } }
-      )
-    }
-
+      if (await privateChat.findOne({ _id: roomID }) != null) {
+        
+        console.log('mensagem do chat privado')
+        await privateChat.findOneAndUpdate(
+          { _id: roomID },
+          { $push: { messages: newMessage } }
+          )
+        }
+        io.to(roomID).emit('new message', newMessage)      
   }
-
 
 }
 

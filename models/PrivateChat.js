@@ -13,6 +13,11 @@ const PrivateSchema = new mongoose.Schema({
         },
         date: {
             type: Date,
+            required: true,
+            default: Date.now
+        },
+        id:{
+            type: String,
             required: true
         }
     }],
