@@ -19,6 +19,8 @@ const io = require('socket.io')(server, {
 require('./controllers/authController')(app)
 require('./controllers/root')(app)
 require('./controllers/PrivateChatRoom')(app)
+require('./controllers/groupRoom')(app)
+require('./controllers/contact')(app)
 io.on('connection', (socket_Server) => socket(socket_Server, io))
 
 

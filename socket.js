@@ -49,17 +49,17 @@ const eventConnectionHandler = (socket_Server, io) => {
 
 
 
-    socket_Server.on('exitRoom', async (exitData) => {
-      console.log('saindo')
-      if(exitData.roomName !== 'public'){
-        socket_Server.leave(exitData.room_ID)
-      }else{
-        socket_Server.leave('public')
-      }
-    })
-
+    
   })
-
+  
+  socket_Server.on('exitRoom', async (exitData) => {
+    console.log('saindo')
+    if(exitData.roomName !== 'public'){
+      socket_Server.leave(exitData.room_ID)
+    }else{
+      socket_Server.leave('public')
+    }
+  })
 
   socket_Server.on('disconnect',  async () => {
     socket_Server.leave(await rooms.getUserRoomName(socket_Server.id))
