@@ -126,11 +126,62 @@ router.post('/groupParticipants', authenticateToken, async (req, resp) => {
   try {
     const GroupID = req.body.GroupID
     const Room = await privateRoom.findOne({ _id: GroupID })
-    
-    resp.send(Room.participants)
+
+    resp.send({
+      createdAt: Room.CreatedAt,
+      creator: Room.creator,
+      description: Room.description,
+      participants: Room.participants,
+      roomName: Room.roomName
+    })
   } catch (err) {
     return resp.send({ err: err})
   }
 })
+
+router.post('/removefromgroup', authenticateToken, async (req, res) => {
+
+  try {
+    const GroupID = req.body.groupId
+    const contactEmail = req.body.contactEmail
+    const userEmail = req.body.userEmail
+    const room = await privateRoom.findOne({ _id: GroupID } )
+
+    const contact = room.participants.filter((element) => {
+      return element.email == contactEmail
+    })
+    const user = room.participants.filter((element) => {
+      return element.email == userEmail
+    })
+
+    console.log(userEmail)
+    const contactStatus = (contact[0].status === undefined) ? undefined : contact[0].status 
+    const userStatus = (user[0].status === undefined) ? undefined : user[0].status 
+
+    if(contactStatus !== undefined){
+      return res.send({error: 'Error, Cannot remove an administrator.'})
+    }if(userStatus == undefined){
+      return res.send({error: 'Error, You are not an administrator.'})
+    }
+
+    await privateRoom.updateOne(
+      { _id: GroupID },
+      { "$pull": { "participants": { "email": contactEmail } } },
+      { safe: true, multi: true }, (err, data) => {
+        if (err) {
+          res.send({ error: 'error to remove this person to the group.' })
+        } else {
+          res.send({ ok: 'usuario removido' })
+
+        }
+      })
+
+    res.send({ok:'ok'})
+  } catch (error) {
+    console.log(error)
+    res.send({ error: error })
+  }
+
+});
 
 module.exports = app => app.use('/group', router)

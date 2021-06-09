@@ -38,7 +38,7 @@ router.post('/addContact', authenticateToken, async (req, res) => {
 
         } else {
           console.log('query salvo')
-          res.send({ ok: 'ok' })
+          res.send({ ok: 'user successful added.' })
         }
       }
     )
@@ -88,7 +88,7 @@ router.post('/deleteContact', authenticateToken, async (req, res) => {
       { "$pull": { "contacts": { "_id": contactToDelet } } },
       { safe: true, multi: true })
       
-    return res.send({ ok: 'ok' })
+    return res.send({ ok: 'User deleted.' })
   } catch (error) {
     console.log(error)
     return res.send({ error: error })

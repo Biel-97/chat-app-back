@@ -33,7 +33,7 @@ router.post('/newPrivateChat', authenticateToken, async (req, res) => {
       await User.findOneAndUpdate({ _id: contactId },
         { $push: { privateChatIds: userInfo } })
       console.log('ok')
-      return res.send({ ok: newPrivateChat.id })
+      return res.send({ chatId: newPrivateChat.id })
     }
 
   } catch (error) {
