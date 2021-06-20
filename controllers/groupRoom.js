@@ -98,24 +98,41 @@ router.post('/leaveRoom', authenticateToken, async (req, resp) => {
     const User_ID = req.body.id
     const GroupID = req.body.GroupID
     const user = await User.findOne({ _id: User_ID })
-
+    
     await privateRoom.updateOne(
       { _id: GroupID },
       { "$pull": { "participants": { "email": user.email } } },
       { safe: true, multi: true })
+      
+      await User.updateOne(
+        { _id: User_ID },
+        { "$pull": { "Rooms": { "Room_id": GroupID } } },
+        { safe: true, multi: true })
+        
+        const group = await privateRoom.findOne({ _id: GroupID })
+        if (group.participants.length == 0) {
+          await privateRoom.remove({ _id: GroupID })
+          return resp.send({ ok: 'ok' })
+        }
+        
+        const currentGroupStatus = await privateRoom.findOne({ _id: GroupID, 'participants.status' : 'administrator' })
+        if(currentGroupStatus == null){
+          let randomParticipantNumber = Math.floor(Math.random() * group.participants.length) + 0
+          let participant = group.participants[randomParticipantNumber]
+          participant.status = 'administrator'
+          await privateRoom.updateOne(
+            { _id: GroupID },
+            { "$pull": { "participants": { "email": participant.email } } },
+            { safe: true, multi: true })
 
-    await User.updateOne(
-      { _id: User_ID },
-      { "$pull": { "Rooms": { "Room_id": GroupID } } },
-      { safe: true, multi: true })
-
-    const groupLength = await privateRoom.findOne({ _id: GroupID })
-
-    if (groupLength.participants.length == 0) {
-      console.log('grupo vazio, deletando-o')
-      await privateRoom.remove({ _id: GroupID })
+          await privateRoom.updateOne(
+            { _id: GroupID },
+            { "$push": { "participants": participant } },
+            { safe: true, multi: true })
+          
     }
-    resp.send({ ok: 'ok' })
+
+    return resp.send({ ok: 'ok' })
   } catch (err) {
     console.log(err)
     return resp.send({ err: 'erro aqui' })
@@ -135,7 +152,7 @@ router.post('/groupParticipants', authenticateToken, async (req, resp) => {
       roomName: Room.roomName
     })
   } catch (err) {
-    return resp.send({ err: err})
+    return resp.send({ err: err })
   }
 })
 
@@ -145,7 +162,7 @@ router.post('/removefromgroup', authenticateToken, async (req, res) => {
     const GroupID = req.body.groupId
     const contactEmail = req.body.contactEmail
     const userEmail = req.body.userEmail
-    const room = await privateRoom.findOne({ _id: GroupID } )
+    const room = await privateRoom.findOne({ _id: GroupID })
 
     const contact = room.participants.filter((element) => {
       return element.email == contactEmail
@@ -154,29 +171,67 @@ router.post('/removefromgroup', authenticateToken, async (req, res) => {
       return element.email == userEmail
     })
 
-    console.log(userEmail)
-    const contactStatus = (contact[0].status === undefined) ? undefined : contact[0].status 
-    const userStatus = (user[0].status === undefined) ? undefined : user[0].status 
+    const contactStatus = (contact[0].status === undefined) ? undefined : contact[0].status
+    const userStatus = (user[0].status === undefined) ? undefined : user[0].status
 
-    if(contactStatus !== undefined){
-      return res.send({error: 'Error, Cannot remove an administrator.'})
-    }if(userStatus == undefined){
-      return res.send({error: 'Error, You are not an administrator.'})
+    if (contactStatus !== undefined) {
+      return res.send({ error: 'Error, Cannot remove an administrator.' })
+    } if (userStatus == undefined) {
+      return res.send({ error: 'Error, You are not an administrator.' })
     }
 
     await privateRoom.updateOne(
       { _id: GroupID },
       { "$pull": { "participants": { "email": contactEmail } } },
-      { safe: true, multi: true }, (err, data) => {
-        if (err) {
-          res.send({ error: 'error to remove this person to the group.' })
-        } else {
-          res.send({ ok: 'usuario removido' })
+      { safe: true, multi: true })
+      
+      await User.findOneAndUpdate(
+        { 'email': contactEmail },
+        {'$pull': { Rooms: {Room_id: GroupID} } }
+      )
 
-        }
-      })
+    res.send({ ok: 'ok' })
+  } catch (error) {
+    console.log(error)
+    res.send({ error: error })
+  }
 
-    res.send({ok:'ok'})
+});
+router.post('/addingroup', authenticateToken, async (req, res) => {
+  const GroupID = req.body.groupId
+  const contactId = req.body.userId
+  try {
+    const currentRoom = await privateRoom.findOne({ _id: GroupID })
+
+    const contact = await User.findOne({ '_id': contactId })
+    const room = await privateRoom.findOne({ _id: GroupID, 'participants.email': contact.email })
+    if (room != null) {
+      return res.send({ error: 'User allready added.' })
+    }
+
+    const contactInfo = {
+      email: contact.email,
+      name: contact.name,
+      _id: contact._id
+    }
+    const roomInfo = {
+      Room_id: currentRoom._id,
+      name: currentRoom.roomName
+    }
+    
+    
+    await User.findOneAndUpdate(//garante que nao salve o usuario duas vezes
+      { '_id': contactId },
+      { $pull: { Rooms: roomInfo }})
+    await privateRoom.findOneAndUpdate(//atualiza o grupo
+      { _id: GroupID },
+      { $push: { participants: contactInfo }})
+    await User.findOneAndUpdate(//atualiza o usuario
+      { '_id': contactId },
+      { $push: { Rooms: roomInfo }})
+        
+        console.log('+1')
+        res.send({ ok: 'ok' })
   } catch (error) {
     console.log(error)
     res.send({ error: error })
