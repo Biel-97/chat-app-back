@@ -26,8 +26,6 @@ router.post('/newGroup', authenticateToken, async (req, res) => {
         { $push: { Rooms: room } }, (err, data) => {
           if (err) {
             res.send({ error: 'error to create the group.' })
-          } else {
-            console.log('tudo ok')
           }
         }
       )
@@ -53,7 +51,7 @@ router.get('/getgroups', async (req, res) => {
       });
 
   } catch (error) {
-    console.log('/getgroups ---erro')
+    res.send(error)
   }
 });
 
@@ -64,7 +62,13 @@ router.post('/groupMessages', authenticateToken, async (req, res) => {
     const chat_ID = req.body.chatId
     if (chat_ID) {
       const currentChat = await privateRoom.findOne({ _id: chat_ID }) || await privateChatRoom.findOne({ _id: chat_ID })
-      res.send({ messages: currentChat.messages, description: currentChat.description })
+      let groupOrChat
+      if(currentChat.creator){
+        groupOrChat = true
+      }else{
+        groupOrChat = false
+      }
+      res.send({ messages: currentChat.messages, description: currentChat.description, groupOrChat })
     } else {
       res.send({ error: 'Chat without a id.' })
     }
@@ -134,7 +138,6 @@ router.post('/leaveRoom', authenticateToken, async (req, resp) => {
 
     return resp.send({ ok: 'ok' })
   } catch (err) {
-    console.log(err)
     return resp.send({ err: 'erro aqui' })
   }
 })
@@ -151,6 +154,39 @@ router.post('/groupParticipants', authenticateToken, async (req, resp) => {
       participants: Room.participants,
       roomName: Room.roomName
     })
+  } catch (err) {
+    return resp.send({ err: err })
+  }
+})
+router.post('/changeGroupInfo', authenticateToken, async (req, resp) => {
+  try {
+    const GroupID = req.body.groupInfo.GroupId
+    const desc = req.body.groupInfo.groupDesc.trim()
+    await privateRoom.findOneAndUpdate({ _id: GroupID }, {'description': desc})
+    resp.send({ok: 'ok'})
+  } catch (err) {
+    return resp.send({ err: err })
+  }
+})
+router.post('/concedAdmAtatus', authenticateToken, async (req, resp) => {
+  try {
+    const groupId = req.body.participantInfo.groupId
+    const participant={
+      _id: req.body.participantInfo._id,
+      name: req.body.participantInfo.name,
+      email: req.body.participantInfo.email,
+      status: 'administrator'
+    }
+
+    await privateRoom.findOneAndUpdate(//garante que nao salve o usuario duas vezes
+      {_id: groupId},
+      { $pull: { participants: {_id: req.body.participantInfo._id} }})
+    await privateRoom.findOneAndUpdate(//atualiza o usuario
+      {_id: groupId},
+      { $push: { participants: participant }})
+
+
+    resp.send({ok: participant})
   } catch (err) {
     return resp.send({ err: err })
   }
@@ -192,7 +228,6 @@ router.post('/removefromgroup', authenticateToken, async (req, res) => {
 
     res.send({ ok: 'ok' })
   } catch (error) {
-    console.log(error)
     res.send({ error: error })
   }
 
@@ -230,10 +265,8 @@ router.post('/addingroup', authenticateToken, async (req, res) => {
       { '_id': contactId },
       { $push: { Rooms: roomInfo }})
         
-        console.log('+1')
         res.send({ ok: 'ok' })
   } catch (error) {
-    console.log(error)
     res.send({ error: error })
   }
 

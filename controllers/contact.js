@@ -33,17 +33,14 @@ router.post('/addContact', authenticateToken, async (req, res) => {
       { _id: req.body.id },
       { $push: { contacts: contact } }, (err, data) => {
         if (err) {
-          console.log('update error')
           res.send({ error: 'Contact error.' })
 
         } else {
-          console.log('query salvo')
           res.send({ ok: 'user successful added.' })
         }
       }
     )
   } catch (error) {
-    console.log('error')
     resp.send({error: error})
   }
 
@@ -58,7 +55,7 @@ router.post('/getContact', authenticateToken, async (req, res) => {
     res.send({ User: await User.findOne({ _id: User_ID }) })
 
   } catch (error) {
-    console.log('erro')
+    res.send(error)
   }
 
 });
@@ -90,7 +87,6 @@ router.post('/deleteContact', authenticateToken, async (req, res) => {
       
     return res.send({ ok: 'User deleted.' })
   } catch (error) {
-    console.log(error)
     return res.send({ error: error })
   }
 });

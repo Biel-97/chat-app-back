@@ -20,7 +20,6 @@ const eventConnectionHandler = (socket_Server, io) => {
   })
 
   socket_Server.on('joinRoom', (data) => {
-    console.log('chegando')
 
     if(data.roomName !== 'public'){
       rooms.updatUserSocketID(data.User_ID, socket_Server.id, data.room_ID)

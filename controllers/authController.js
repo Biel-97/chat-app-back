@@ -29,7 +29,6 @@ router.post('/register', async (req, res)=> {
             return res.send({ userInfo, token })
         }
     } catch (err) {
-        console.log(err)
         return res.send({ error: 'Registration fail', err })
     }
 
@@ -43,7 +42,6 @@ router.post('/login',  async (req, res) => {
     if (!password) return res.send({ error: 'Password field is empty' })
     if (!email) return res.send({ error: 'Email field is empty' })
 
-    console.log(email, password)
     const userInfo = await User.findOne({ email }).select('+password')
     if (!userInfo) {
         return res.send({ error: 'User not found' })

@@ -30,7 +30,6 @@ class Rooms {
   async updateMessageRoom(roomID, newMessage, io) {
     if (await PrivateRoom.findOne({ _id: roomID }) != null) {
       
-      console.log('mensagem do grupo')
       await PrivateRoom.findOneAndUpdate(
         { _id: roomID },
         { $push: { messages: newMessage } })
@@ -38,7 +37,6 @@ class Rooms {
       
       if (await privateChat.findOne({ _id: roomID }) != null) {
         
-        console.log('mensagem do chat privado')
         await privateChat.findOneAndUpdate(
           { _id: roomID },
           { $push: { messages: newMessage } }
