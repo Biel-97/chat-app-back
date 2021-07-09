@@ -21,32 +21,5 @@ router.post('/', authenticateToken, async (req, resp) => {
   }
 })
 
-router.get('/users', (req, res) => {
-  try {
-    User.find()
-      .exec((err, users) => {
-        if (err) {
-        } else {
-          res.send(users);
-        }
-      });
-  } catch (error) {
-    console.log('erro')
-  }
-
-});
-router.get('/privatechat', (req, res) => {
-  try {
-    PrivateChat.find()
-      .exec((err, privatemsg) => {
-        if (err) {
-        } else {
-          res.send(privatemsg);
-        }
-      });
-  } catch (error) {
-
-  }
-})
 
 module.exports = app => app.use('/', router)

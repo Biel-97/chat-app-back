@@ -19,7 +19,6 @@ router.post('/newPrivateChat', authenticateToken, async (req, res) => {
     const contactInfo = req.body.contactId
     const chat = await PrivateChat.findOne({ personsID: [UserID, contactId] }) || await PrivateChat.findOne({ personsID: [contactId, UserID] })
     if (chat != null) {
-      console.log('Chat already exist.')
       return res.send({ chatId: chat._id })
     } else {
       const newPrivateChat = await PrivateChat.create({ personsID: [UserID, contactId] })
@@ -32,12 +31,10 @@ router.post('/newPrivateChat', authenticateToken, async (req, res) => {
 
       await User.findOneAndUpdate({ _id: contactId },
         { $push: { privateChatIds: userInfo } })
-      console.log('ok')
       return res.send({ chatId: newPrivateChat.id })
     }
 
   } catch (error) {
-    console.log(error)
     res.send({ error: error })
   }
 });

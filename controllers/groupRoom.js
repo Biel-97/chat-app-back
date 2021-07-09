@@ -39,21 +39,6 @@ router.post('/newGroup', authenticateToken, async (req, res) => {
 
 
 });
-router.get('/getgroups', async (req, res) => {
-
-  try {
-    privateRoom.find()
-      .exec((err, groups) => {
-        if (err) {
-        } else {
-          res.send(groups);
-        }
-      });
-
-  } catch (error) {
-    res.send(error)
-  }
-});
 
 
 router.post('/groupMessages', authenticateToken, async (req, res) => {
@@ -73,7 +58,7 @@ router.post('/groupMessages', authenticateToken, async (req, res) => {
       res.send({ error: 'Chat without a id.' })
     }
   } catch (error) {
-    res.send({ error: 'errorr' })
+    res.send({ error: error })
   }
 
 });
@@ -92,7 +77,7 @@ router.post('/authRoom', authenticateToken, async (req, resp) => {
     }
 
   } catch (error) {
-    return resp.send({ error: 'erro aqui' })
+    return resp.send({ error: error })
   }
 })
 
@@ -137,8 +122,8 @@ router.post('/leaveRoom', authenticateToken, async (req, resp) => {
     }
 
     return resp.send({ ok: 'ok' })
-  } catch (err) {
-    return resp.send({ err: 'erro aqui' })
+  } catch (error) {
+    return resp.send({ error: error })
   }
 })
 

@@ -11,13 +11,13 @@ router.post('/register', async (req, res)=> {
     req.body.userSocketID =''
     req.body.currentRoomName =''
     try {
-        // if (!email && !name && !password) return res.send({ error: 'Please, fill the fields below.' })
-        // if (!name) return res.send({ error: 'Name field is empty' })
-        // else if (name.length <= 3) return res.send({ error: 'Name too short' })
-        // if (!email) return res.send({ error: 'Email field is empty' })
-        // if (!password) return res.send({ error: 'Password field is empty' })
-        // else if (password.length <= 3) return res.send({ error: 'Password shorter than 3 caracteres.' })
-        // else if (password.length >= 10) return res.send({ error: 'Password bigger than 10 caracteres.' })
+        if (!email && !name && !password) return res.send({ error: 'Please, fill the fields below.' })
+        if (!name) return res.send({ error: 'Name field is empty' })
+        else if (name.length <= 3) return res.send({ error: 'Name too short' })
+        if (!email) return res.send({ error: 'Email field is empty' })
+        if (!password) return res.send({ error: 'Password field is empty' })
+        else if (password.length <= 3) return res.send({ error: 'Password shorter than 3 caracteres.' })
+        else if (password.length >= 10) return res.send({ error: 'Password bigger than 10 caracteres.' })
         
         if (await User.findOne({ email })) {
             return res.send({ error: 'Email alread registred' })
@@ -29,7 +29,7 @@ router.post('/register', async (req, res)=> {
             return res.send({ userInfo, token })
         }
     } catch (err) {
-        return res.send({ error: 'Registration fail', err })
+        return res.send({ error: 'Registration fail' })
     }
 
   })
@@ -53,7 +53,7 @@ router.post('/login',  async (req, res) => {
 
             return res.send({ userInfo, token })
         } else {
-            return res.send({ error: 'senha incompativel' })
+            return res.send({ error: 'sorry, some data is incompatible' })
         }
     }
 

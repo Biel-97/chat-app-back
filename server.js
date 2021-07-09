@@ -7,12 +7,14 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config()
 
-app.use(cors())
+
+let url = process.env.FRONT_URL?process.env.FRONT_URL:'http://localhost:4200'
+app.use(cors({origin: url}))
 app.use(bodyParser.json());
 
 const io = require('socket.io')(server, {
   cors: {
-    origin: "http://localhost:4200"
+    origin: url
   }
 });
 

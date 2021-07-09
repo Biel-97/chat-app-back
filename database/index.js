@@ -1,8 +1,9 @@
 const mongoose = require('mongoose')
+require('dotenv').config()
 
 mongoose.Promise = global.Promise
 
-let db = 'mongodb://localhost/chat-app'
+let db = process.env.MONGO_DB_ACESS?process.env.MONGO_DB_ACESS:'mongodb://localhost/chat-app'
 
 
 mongoose.connect(db, {useNewUrlParser: true, useUnifiedTopology: true})
