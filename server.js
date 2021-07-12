@@ -23,6 +23,9 @@ require('./controllers/root')(app)
 require('./controllers/PrivateChatRoom')(app)
 require('./controllers/groupRoom')(app)
 require('./controllers/contact')(app)
+app.get('/',(req, res) => {
+  res.send({ok:'ok'})
+})
 io.on('connection', (socket_Server) => socket(socket_Server, io))
 
 
