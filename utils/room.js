@@ -5,10 +5,10 @@ const User = require('../models/user')
 class Rooms {
   constructor() { }
 
-  async updatUserSocketID(userID, socketID, currentRoomName) {
+  async updatsocketID(userID, socketID, currentRoomName) {
     User.findOneAndUpdate(
       { _id: userID },
-      { userSocketID: socketID } )
+      { socketID: socketID } )
 
 
     User.findOneAndUpdate(
@@ -18,7 +18,7 @@ class Rooms {
 
 
   async getUserRoomName(socketID) {
-      const room = (await User.findOne({ userSocketID: socketID }) == null) == true? 'public': await User.findOne({ userSocketID: socketID })
+      const room = (await User.findOne({ socketID: socketID }) == null) == true? 'public': await User.findOne({ socketID: socketID })
       if(room == 'public'){
         return 'public'
       }else{

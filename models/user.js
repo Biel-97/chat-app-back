@@ -46,11 +46,7 @@ const userSchema = new mongoose.Schema({
         }
     }],
     privateChatIds: [{}],
-    userSocketID: {
-        type: String,
-        require: true,
-        unique: true
-    },
+    socketID: {},
 
 })
 
