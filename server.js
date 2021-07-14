@@ -8,8 +8,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config()
 
 
-// let url = process.env.FRONT_URL?process.env.FRONT_URL:'http://localhost:4200'
-let url = 'http://localhost:4200'
+let url = process.env.FRONT_URL?process.env.FRONT_URL:'http://localhost:4200'
 app.use(cors({origin: url}))
 app.use(bodyParser.json());
 
