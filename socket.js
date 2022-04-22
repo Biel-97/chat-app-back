@@ -22,7 +22,7 @@ const eventConnectionHandler = (socket_Server, io) => {
   socket_Server.on('joinRoom', (data) => {
 
     if(data.roomName !== 'public'){
-      rooms.updatUserSocketID(data.User_ID, socket_Server.id, data.room_ID)
+      rooms.updatsocketID(data.User_ID, socket_Server.id, data.room_ID)
       socket_Server.join(data.room_ID)
     }else{
       socket_Server.join('public')
